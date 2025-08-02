@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "code2md"
+version = "0.1.0"
+authors = [{ name = "a-duty-rookie", email = "yutaro1127@gmail.com" }]
+description = "A CLI tool to bundle coding files into a single Markdown file."
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+# 👇 依存関係を追加！
+dependencies = [
+    "nbformat",
+    "pathspec", # .gitignoreを解釈するために追加！
+]
+
+[project.scripts]
+code2md = "code2md.__main__:main"
