@@ -22,3 +22,6 @@ dependencies = [
 
 [project.scripts]
 code2md = "code2md.__main__:main"
+
+[project.optional-dependencies]
+test = ["pytest"]
