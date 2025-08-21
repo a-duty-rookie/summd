@@ -1,4 +1,5 @@
 import logging
+import re
 import sys
 from pathlib import Path
 from typing import Dict, List, Set
@@ -63,6 +64,8 @@ LANG_MAP: Dict[str, str] = {
     ".ipynb": "python",  # ipynbのコードセルはpythonとして扱う
 }
 
+_HEADING_RE = re.compile(r"^(?P<hashes>#{1,6})(?P<rest>\s.*)$")
+
 
 def _get_language(file_path: Path) -> str:
     """ファイルパスの拡張子から言語名を取得する"""
@@ -71,18 +74,14 @@ def _get_language(file_path: Path) -> str:
     return LANG_MAP.get(file_path.suffix.lower(), "")
 
 
-def _adjust_markdown_header(line: str) -> str:
-    """Markdownの見出しレベルを調整する (最大H3)"""
-    if line.strip().startswith("#"):
-        stripped_line = line.lstrip()
-        content = stripped_line.lstrip("#")
-        level = len(stripped_line) - len(content)
-
-        # H1 -> H3, H2 -> H4 のようにレベルを2つ下げる
-        # Markdownの最大見出しレベルはH6なので、それを超えないようにする
-        new_level = min(level + 2, 6)
-        return "#" * new_level + content
-    return line
+def _adjust_markdown_header(line: str, min_level: int = 3) -> str:
+    """Markdown見出しを最低でもH3にする（H1/H2→H3、H3+はそのまま）"""
+    m = _HEADING_RE.match(line.lstrip())
+    if not m:
+        return line
+    level = len(m.group("hashes"))
+    new_level = min(max(level, min_level), 6)
+    return "#" * new_level + m.group("rest")
 
 
 def _process_ipynb_file(file_path: Path) -> str:
@@ -137,7 +136,8 @@ def find_target_files(root_path: Path, ignored_extensions: Set[str]) -> List[Pat
 
     for p in root_path.rglob("*"):
         # パスを文字列に変換して.gitignoreの判定に使う
-        relative_path_str = str(p.relative_to(root_path))
+        relative_path = p.relative_to(root_path)
+        relative_path_str = relative_path.as_posix()
 
         # .gitignoreとデフォルトの無視パターンにマッチするかチェック
         if gitignore_spec.match_file(relative_path_str):
@@ -204,7 +204,7 @@ def generate_markdown(
     md_content = [f"# {root_path.absolute().name}\n"]
 
     for file_path in target_files:
-        relative_path = file_path.relative_to(root_path)
+        relative_path = file_path.relative_to(root_path).as_posix()
         md_content.append(f"## ./{relative_path}\n")
         content = _read_file_content(file_path)
         md_content.append(f"{content}\n")
