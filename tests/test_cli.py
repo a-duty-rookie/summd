@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from code2md.__main__ import main
+from summd.__main__ import main
 
 
 def test_cli_success(project_root: Path, tmp_path: Path, capsys):

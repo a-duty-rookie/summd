@@ -2,7 +2,7 @@ import argparse
 from pathlib import Path
 from typing import Sequence
 
-from code2md.generator import generate_markdown
+from summd.generator import generate_markdown
 
 
 def main(argv: Sequence[str] | None = None) -> None:

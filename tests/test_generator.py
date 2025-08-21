@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from code2md.generator import find_target_files, generate_markdown
+from summd.generator import find_target_files, generate_markdown
 
 
 @pytest.fixture
